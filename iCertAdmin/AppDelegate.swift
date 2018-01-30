@@ -7,40 +7,106 @@
 //
 
 import UIKit
+import SwiftyUserDefaults
+import SwiftEasyKit
+import ReSwift
+import UserNotifications
+import FontAwesome_swift
+import Fabric
+import Crashlytics
 
 @UIApplicationMain
-class AppDelegate: UIResponder, UIApplicationDelegate {
+class AppDelegate: DefaultAppDelegate {
 
-  var window: UIWindow?
-
-
-  func application(_ application: UIApplication, didFinishLaunchingWithOptions launchOptions: [UIApplicationLaunchOptionsKey: Any]?) -> Bool {
-    // Override point for customization after application launch.
+  override func application(_ application: UIApplication, didFinishLaunchingWithOptions launchOptions: [UIApplicationLaunchOptionsKey : Any]?) -> Bool {
+    let _ = Configure()
+    let _ = LocalDevelopment()
+    super.application(application, didFinishLaunchingWithOptions: launchOptions)
+    boot()
+    Fabric.with([Crashlytics.self])
+    // TODO: Move this to where you establish a user session
+    self.logUser()
     return true
   }
 
-  func applicationWillResignActive(_ application: UIApplication) {
-    // Sent when the application is about to move from active to inactive state. This can occur for certain types of temporary interruptions (such as an incoming phone call or SMS message) or when the user quits the application and it begins the transition to the background state.
-    // Use this method to pause ongoing tasks, disable timers, and invalidate graphics rendering callbacks. Games should use this method to pause the game.
+  func logUser() {
+    // TODO: Use the current user's information
+    // You can call any combination of these three methods
+    Crashlytics.sharedInstance().setUserEmail("user@fabric.io")
+    Crashlytics.sharedInstance().setUserIdentifier("12345")
+    Crashlytics.sharedInstance().setUserName("Test User")
   }
 
-  func applicationDidEnterBackground(_ application: UIApplication) {
-    // Use this method to release shared resources, save user data, invalidate timers, and store enough application state information to restore your application to its current state in case it is terminated later.
-    // If your application supports background execution, this method is called instead of applicationWillTerminate: when the user quits.
+  func boot() {
+    let icons: [FontAwesome] = [.creditCard, .calendar, .idCardO, .print, .dollar]
+    let images = icons.map({icon($0)})
+    let selectedImages = icons.map({icon($0, selected: true)})
+    (window, tabBarViewController) = enableTabBarController(self, viewControllers:
+      [CartsSegmentViewController(),
+//       HomeViewController(),
+//       HomeViewController(), //CertsViewController(),
+//        HomeViewController(),
+        HomeViewController()
+      ], titles:
+      ["首頁",
+       "其他"
+//       "修課中", "我的證書", "申請追蹤", "udallor"
+      ], images: images, selectedImages: selectedImages
+    )
+    window?.backgroundColor = UIColor.darkGray.lighter()
+    window?.layer.contents = UIImage(named: "background")?.cgImage
   }
 
-  func applicationWillEnterForeground(_ application: UIApplication) {
-    // Called as part of the transition from the background to the active state; here you can undo many of the changes made on entering the background.
+  override func didNotificationTapped(userInfo: [AnyHashable : Any]) {
+//    if let state = userInfo["state"] as? String {
+//      switch state {
+//      case "unconfirmed":
+//        let vc = CartsSegmentViewController()
+//        vc.enableCloseBarButtonItem()
+//        currentViewController.openViewController(vc, completion: {
+//          delayedJob(1) { vc.segment.tappedAtIndex(1) }
+//        })
+//      case "confirmed":
+//        let vc = CartsSegmentViewController()
+//        vc.enableCloseBarButtonItem()
+//        currentViewController.openViewController(vc, completion: { delayedJob(1) { vc.segment.tappedAtIndex(2) } })
+//      case "unpaid":
+//        let vc = PapersSegmentViewController()
+//        vc.enableCloseBarButtonItem()
+//        currentViewController.openViewController(vc, completion: {
+//          //          delayedJob(1) { vc.segment.tappedAtIndex(1) }
+//        })
+//      case "rateable":
+//        let vc = PapersSegmentViewController()
+//        vc.enableCloseBarButtonItem()
+//        currentViewController.openViewController(vc, completion: { delayedJob(1) { vc.segment.tappedAtIndex(4) } })
+//      case "udollar":
+//        let vc = UdollarsViewController()
+//        vc.enableCloseBarButtonItem()
+//        currentViewController.openViewController(vc)
+//      default:break;
+//      }
+//    }
   }
 
-  func applicationDidBecomeActive(_ application: UIApplication) {
-    // Restart any tasks that were paused (or not yet started) while the application was inactive. If the application was previously in the background, optionally refresh the user interface.
+  @available(iOS 10.0, *)
+  func userNotificationCenter(_ center: UNUserNotificationCenter, willPresent notification: UNNotification, withCompletionHandler completionHandler: @escaping (UNNotificationPresentationOptions) -> Void) {
+    let userInfo = notification.request.content.userInfo
+    _logForAnyMode(userInfo)
+    completionHandler([.alert, .badge])
+    //    if let alert = (userInfo["aps"] as! [String: Any])["alert"] as? String {
+    //      completionHandler([.alert, .badge])
+    //    }
+
   }
 
-  func applicationWillTerminate(_ application: UIApplication) {
-    // Called when the application is about to terminate. Save data if appropriate. See also applicationDidEnterBackground:.
-  }
+  //  func icon(_ name: FontAwesome, selected: Bool = false) -> UIImage {
+  //    let size = 30
+  //    let color = selected ? K.Color.tabBar : K.Color.tabBarUnselected
+  //    return getIcon(name, options: ["color": color, "size": size])
+  //  }
 
 
 }
+
 
